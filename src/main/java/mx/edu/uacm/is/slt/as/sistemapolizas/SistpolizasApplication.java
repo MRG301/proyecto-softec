@@ -12,10 +12,10 @@ public class SistpolizasApplication {
 
 		SpringApplication.run(SistpolizasApplication.class, args);
 	}
-
+/*
 	@Bean
 	public RestTemplate restTemplate() {
 		return new RestTemplate();
-	}
+	}*/
 
 }
