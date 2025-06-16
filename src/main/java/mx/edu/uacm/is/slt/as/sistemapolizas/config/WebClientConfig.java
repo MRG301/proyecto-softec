@@ -8,8 +8,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
     @Bean
     WebClient polizaWebClient() {
-        return WebClient.builder()
-                .baseUrl("http://nachintoch.mx:8080")
-                .build();
+        return WebClient.builder().baseUrl("http://nachintoch.mx:8080").build();
     }
 }

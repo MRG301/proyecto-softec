@@ -2,8 +2,6 @@ package mx.edu.uacm.is.slt.as.sistemapolizas;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.client.RestTemplate;
 
 @SpringBootApplication
 public class SistpolizasApplication {
@@ -12,10 +10,4 @@ public class SistpolizasApplication {
 
 		SpringApplication.run(SistpolizasApplication.class, args);
 	}
-/*
-	@Bean
-	public RestTemplate restTemplate() {
-		return new RestTemplate();
-	}*/
-
 }
