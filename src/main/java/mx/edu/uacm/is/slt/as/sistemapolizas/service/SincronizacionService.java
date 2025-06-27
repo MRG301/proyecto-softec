@@ -7,6 +7,7 @@ import mx.edu.uacm.is.slt.as.sistemapolizas.dto.PolizaDTO;
 import mx.edu.uacm.is.slt.as.sistemapolizas.extern.PolizaExternalClient;
 import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.ClienteMapper;
 import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.PolizaMapper;
+import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.BeneficiarioMapper;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.Poliza;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.BeneficiarioPolizaRepository;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.ClienteRepository;
@@ -49,7 +50,15 @@ public class SincronizacionService {
             Poliza polizaLocal = PolizaMapper.toEntity(pDto);
             polizaRepo.save(polizaLocal);
 
-            // aqui beneficiarios
+            // Beneficiarios
+            var beneficiariosRemotos = external.obtenerBeneficiariosPorPoliza(pDto.clave());
+            // elimina todos los beneficiarios locales existentes
+            beneficiarioRepo.deleteAllByIdClavePoliza(pDto.clave());
+
+            if (beneficiariosRemotos != null) {
+                beneficiariosRemotos.forEach(bDto ->
+                        beneficiarioRepo.save(BeneficiarioMapper.toEntity(bDto, pDto.clave())));
+            }
         }
     }
 
