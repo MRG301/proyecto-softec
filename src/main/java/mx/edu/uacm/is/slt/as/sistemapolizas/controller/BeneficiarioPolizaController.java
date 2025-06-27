@@ -41,7 +41,7 @@ public class BeneficiarioPolizaController {
             @PathVariable(required = false) String segundoApellido,
             // si llega a caer por la segunda ruta, sin segundoApellido
             // Spring asigna a este parametro el valor del path “fechaNacimiento”
-            // para distinguir, verificamos si es número de comentarios o no
+            // para distinguir, verificamos si es una fecha válida o no
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fechaNacimiento
     ) {
         // si segundoApellido vino con formato de fecha, intercambiamos
