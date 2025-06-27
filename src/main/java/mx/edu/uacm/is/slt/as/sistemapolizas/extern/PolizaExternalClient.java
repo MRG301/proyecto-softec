@@ -64,7 +64,8 @@ public class PolizaExternalClient {
                 .block();
     }
 
-    // devuelve todos los beneficiarios de una póliza - Revisar
+    // Obtiene todos los beneficiarios de la póliza. Las respuestas HTTP 4xx
+    // se transforman en una lista vacía en lugar de provocar una excepción.
     public List<BeneficiarioDTO> obtenerBeneficiarios(UUID clave) {
         return web.get()
                 .uri("/poliza/{clave}/beneficiarios", clave)
@@ -76,7 +77,8 @@ public class PolizaExternalClient {
                 .block();
     }
 
-    //  devuelve todos los beneficiarios de una póliza o lista vacía si la ruta retorna 404 - asi no
+    // Obtiene todos los beneficiarios de la póliza sin interceptar las respuestas
+    // 4xx; cualquier error de este tipo se propaga como excepción.
     public List<BeneficiarioDTO> obtenerBeneficiariosPorPoliza(UUID clavePoliza) {
         return web.get()
                 .uri("/beneficiarios/{clave}", clavePoliza)   // una sola variable
