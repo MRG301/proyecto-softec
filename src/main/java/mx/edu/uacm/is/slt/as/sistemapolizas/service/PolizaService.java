@@ -50,18 +50,22 @@ public class PolizaService {
         return repo.findByTipo(tipo);
     }
     public List<Poliza> buscarPorNombreAsegurado(String n, String p) {
-        return List.of();
+        return repo.buscarPorNombreAsegurado(n, p, null);
     }
+
     public List<Poliza> buscarPorNombreAsegurado(String n, String p, String s) {
-        return List.of();
+        return repo.buscarPorNombreAsegurado(n, p, s);
     }
+
     public List<Poliza> buscarPorNombreBeneficiario(String n, String p) {
-        return List.of();
+        return repo.buscarPorNombreBeneficiario(n, p, null);
     }
+
     public List<Poliza> buscarPorNombreBeneficiario(String n, String p, String s) {
-        return List.of();
+        return repo.buscarPorNombreBeneficiario(n, p, s);
     }
+
     public List<Poliza> buscarPorFechaBeneficiario(LocalDate f) {
-        return List.of();
+        return repo.buscarPorFechaBeneficiario(f);
     }
 }
