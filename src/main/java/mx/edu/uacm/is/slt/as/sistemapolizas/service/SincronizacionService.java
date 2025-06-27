@@ -41,6 +41,9 @@ public class SincronizacionService {
     @Transactional
     public void sincronizarTodo() {            // en StartupSync se llama
         List<PolizaDTO> remotas = external.obtenerTodasLasPolizas();
+        if (remotas == null) {
+            return;
+        }
 
         for (PolizaDTO pDto : remotas) {
             // clientes
