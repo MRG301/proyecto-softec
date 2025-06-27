@@ -50,7 +50,7 @@ public class SincronizacionService {
             Poliza polizaLocal = PolizaMapper.toEntity(pDto);
             polizaRepo.save(polizaLocal);
 
-            // Beneficiarios
+            // Beneficiarios: se reemplazan con los obtenidos del servicio remoto
             var beneficiariosRemotos = external.obtenerBeneficiariosPorPoliza(pDto.clave());
             // elimina todos los beneficiarios locales existentes
             beneficiarioRepo.deleteAllByIdClavePoliza(pDto.clave());
