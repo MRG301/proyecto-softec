@@ -35,8 +35,8 @@ public class SincronizacionService {
      *    si el cliente remoto no existe local → lo inserta o actualiza campos si ya está
      *    inserta/actualiza la póliza mapeo DTO→Entity
      *    borra todos los beneficiarios locales de esa póliza
-     *    Revisar vuelve a traer TODOS los beneficiarios remotos para esa póliza
-     *    y los inserta uno a uno o actualiza si cambia porcentaje.
+     *    obtiene nuevamente los beneficiarios remotos de esa póliza y los
+     *    almacena uno a uno (actualizando si cambia el porcentaje)
      */
     @Transactional
     public void sincronizarTodo() {            // en StartupSync se llama
