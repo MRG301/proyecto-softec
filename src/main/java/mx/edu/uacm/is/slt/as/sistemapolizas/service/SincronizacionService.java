@@ -4,10 +4,13 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import mx.edu.uacm.is.slt.as.sistemapolizas.dto.ClienteDTO;
 import mx.edu.uacm.is.slt.as.sistemapolizas.dto.PolizaDTO;
+import mx.edu.uacm.is.slt.as.sistemapolizas.dto.BeneficiarioDTO;
 import mx.edu.uacm.is.slt.as.sistemapolizas.extern.PolizaExternalClient;
 import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.ClienteMapper;
+import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.BeneficiarioMapper;
 import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.PolizaMapper;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.Poliza;
+import mx.edu.uacm.is.slt.as.sistemapolizas.model.BeneficiarioPoliza;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.BeneficiarioPolizaRepository;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.ClienteRepository;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.PolizaRepository;
@@ -39,17 +42,36 @@ public class SincronizacionService {
      */
     @Transactional
     public void sincronizarTodo() {            // en StartupSync se llama
-        List<PolizaDTO> remotas = external.obtenerTodasLasPolizas();
+        List<PolizaDTO> remotas;
+        try {
+            remotas = external.obtenerTodasLasPolizas();
+        } catch (Exception e) {
+            // si la comunicación falla no hacemos nada
+            return;
+        }
 
         for (PolizaDTO pDto : remotas) {
-            // clientes
-            ClienteDTO cDto = external.obtenerCliente(pDto.curpCliente());
-            clienteRepo.save(ClienteMapper.toEntity(cDto));
-            // pólizas
-            Poliza polizaLocal = PolizaMapper.toEntity(pDto);
-            polizaRepo.save(polizaLocal);
+            try {
+                // clientes
+                ClienteDTO cDto = external.obtenerCliente(pDto.curpCliente());
+                if (cDto != null) {
+                    clienteRepo.save(ClienteMapper.toEntity(cDto));
+                }
 
-            // aqui beneficiarios
+                // pólizas
+                Poliza polizaLocal = PolizaMapper.toEntity(pDto);
+                polizaRepo.save(polizaLocal);
+
+                // beneficiarios
+                beneficiarioRepo.deleteAllByIdClavePoliza(pDto.clave());
+                List<BeneficiarioDTO> beneficiarios = external.obtenerBeneficiarios(pDto.clave());
+                for (BeneficiarioDTO bDto : beneficiarios) {
+                    BeneficiarioPoliza b = BeneficiarioMapper.toEntity(bDto, pDto.clave());
+                    beneficiarioRepo.save(b);
+                }
+            } catch (Exception ex) {
+                // errores individuales se ignoran para continuar con el resto
+            }
         }
     }
 
