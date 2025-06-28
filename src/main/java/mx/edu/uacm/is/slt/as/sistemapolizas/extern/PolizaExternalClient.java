@@ -22,10 +22,78 @@ public class PolizaExternalClient {
     @Qualifier("polizaWebClient")
     private final WebClient web;
 
+    // ---- Operaciones remotas de escritura ----
+
+    public void crearPolizaRemota(PolizaDTO dto) {
+        String path = String.format(
+                "/poliza/%s/%d/%.2f/%s/%s",
+                dto.clave(), dto.tipo(), dto.monto(), dto.descripcion(), dto.curpCliente()
+        );
+        web.post()
+                .uri(path)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+    }
+
     public void actualizarPolizaRemota(PolizaDTO dto) {
+        String path = String.format(
+                "/poliza/%s/%d/%.2f/%s/%s",
+                dto.clave(), dto.tipo(), dto.monto(), dto.descripcion(), dto.curpCliente()
+        );
         web.put()
-                .uri("/{clave}", dto.clave())
-                .bodyValue(dto)
+                .uri(path)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+    }
+
+    public void crearClienteRemoto(ClienteDTO dto) {
+        String base = String.format(
+                "/cliente/%s/%s/%s/%s/%s",
+                dto.curp(), dto.direccion(), dto.fechaNacimiento().toLocalDate(),
+                dto.nombres(), dto.primerApellido()
+        );
+        if (dto.segundoApellido() != null) {
+            base += "/" + dto.segundoApellido();
+        }
+        web.post()
+                .uri(base)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+    }
+
+    public void actualizarClienteRemoto(ClienteDTO dto) {
+        String base = String.format(
+                "/cliente/%s/%s/%s/%s/%s",
+                dto.curp(), dto.direccion(), dto.fechaNacimiento().toLocalDate(),
+                dto.nombres(), dto.primerApellido()
+        );
+        if (dto.segundoApellido() != null) {
+            base += "/" + dto.segundoApellido();
+        }
+        web.put()
+                .uri(base)
+                .retrieve()
+                .toBodilessEntity()
+                .block();
+    }
+
+    public void crearBeneficiarioRemoto(UUID clavePoliza, BeneficiarioDTO dto) {
+        String base = String.format(
+                "/beneficiario/%s/%s/%d/%s/%s",
+                dto.fechaNacimiento().toLocalDate(),
+                clavePoliza,
+                dto.porcentaje(),
+                dto.nombres(),
+                dto.primerApellido()
+        );
+        if (dto.segundoApellido() != null) {
+            base += "/" + dto.segundoApellido();
+        }
+        web.post()
+                .uri(base)
                 .retrieve()
                 .toBodilessEntity()
                 .block();

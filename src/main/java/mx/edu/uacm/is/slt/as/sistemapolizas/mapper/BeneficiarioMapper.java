@@ -17,4 +17,15 @@ public interface BeneficiarioMapper {
         );
         return new BeneficiarioPoliza(id, dto.porcentaje());
     }
+
+    static BeneficiarioDTO toDto(BeneficiarioPoliza entity) {
+        BeneficiarioPolizaId id = entity.getId();
+        return new BeneficiarioDTO(
+                id.getNombres(),
+                id.getPrimerApellido(),
+                id.getSegundoApellido(),
+                id.getFechaNacimiento().atStartOfDay().atOffset(java.time.ZoneOffset.UTC),
+                entity.getPorcentaje()
+        );
+    }
 }

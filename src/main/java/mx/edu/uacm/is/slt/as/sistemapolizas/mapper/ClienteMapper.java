@@ -14,4 +14,15 @@ public interface ClienteMapper {
                 dto.fechaNacimiento().toLocalDate()
         );
     }
+
+    static ClienteDTO toDto(Cliente entity) {
+        return new ClienteDTO(
+                entity.getCurp(),
+                entity.getNombres(),
+                entity.getPrimerApellido(),
+                entity.getSegundoApellido(),
+                entity.getDireccion(),
+                entity.getFechaNacimiento().atStartOfDay().atOffset(java.time.ZoneOffset.UTC)
+        );
+    }
 }

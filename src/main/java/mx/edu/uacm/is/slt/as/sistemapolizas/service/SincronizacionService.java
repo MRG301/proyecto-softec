@@ -4,10 +4,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import mx.edu.uacm.is.slt.as.sistemapolizas.dto.ClienteDTO;
 import mx.edu.uacm.is.slt.as.sistemapolizas.dto.PolizaDTO;
+import mx.edu.uacm.is.slt.as.sistemapolizas.dto.BeneficiarioDTO;
 import mx.edu.uacm.is.slt.as.sistemapolizas.extern.PolizaExternalClient;
 import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.ClienteMapper;
+import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.BeneficiarioMapper;
 import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.PolizaMapper;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.Poliza;
+import mx.edu.uacm.is.slt.as.sistemapolizas.model.Cliente;
+import mx.edu.uacm.is.slt.as.sistemapolizas.model.BeneficiarioPoliza;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.BeneficiarioPolizaRepository;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.ClienteRepository;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.PolizaRepository;
@@ -39,44 +43,95 @@ public class SincronizacionService {
      */
     @Transactional
     public void sincronizarTodo() {            // en StartupSync se llama
-        List<PolizaDTO> remotas = external.obtenerTodasLasPolizas();
+        List<PolizaDTO> remotas;
+        try {
+            remotas = external.obtenerTodasLasPolizas();
+        } catch (Exception e) {
+            // si la comunicación falla no hacemos nada
+            return;
+        }
 
         for (PolizaDTO pDto : remotas) {
-            // clientes
-            ClienteDTO cDto = external.obtenerCliente(pDto.curpCliente());
-            clienteRepo.save(ClienteMapper.toEntity(cDto));
-            // pólizas
-            Poliza polizaLocal = PolizaMapper.toEntity(pDto);
-            polizaRepo.save(polizaLocal);
+            try {
+                // clientes
+                ClienteDTO cDto = external.obtenerCliente(pDto.curpCliente());
+                if (cDto != null) {
+                    clienteRepo.save(ClienteMapper.toEntity(cDto));
+                }
 
-            // aqui beneficiarios
+                // pólizas
+                Poliza polizaLocal = PolizaMapper.toEntity(pDto);
+                polizaRepo.save(polizaLocal);
+
+                // beneficiarios
+                beneficiarioRepo.deleteAllByIdClavePoliza(pDto.clave());
+                List<BeneficiarioDTO> beneficiarios = external.obtenerBeneficiarios(pDto.clave());
+                for (BeneficiarioDTO bDto : beneficiarios) {
+                    BeneficiarioPoliza b = BeneficiarioMapper.toEntity(bDto, pDto.clave());
+                    beneficiarioRepo.save(b);
+                }
+            } catch (Exception ex) {
+                // errores individuales se ignoran para continuar con el resto
+            }
         }
     }
 
 
-    /** cuando en la BD local se crea o actualiza una póliza este
-     * método debe llamarse para propagar el cambio al sistema remoto */
-    public Poliza crearOActualizarPolizaLocal(Poliza entidadLocal) {
-        // guardo local
-        Poliza guardada = polizaRepo.save(entidadLocal);
-
-        // actualiza/crea en remoto
-        PolizaDTO dto = PolizaMapper.toDto(guardada);
-        // si falla, puedes manejar excepción
-        external.actualizarPolizaRemota(dto);
+    /**
+     * Crea una póliza local y también la registra en el sistema remoto.
+     */
+    public Poliza crearPolizaLocal(Poliza nueva) {
+        Poliza guardada = polizaRepo.save(nueva);
+        external.crearPolizaRemota(PolizaMapper.toDto(guardada));
         return guardada;
     }
 
-    // lo mismo para eliminar
-    public void eliminarPolizaLocal(UUID clave) {
-        // borra en local
-        polizaRepo.deleteById(clave);
+    /**
+     * Actualiza una póliza local y refleja el cambio en el sistema remoto.
+     */
+    public Poliza actualizarPolizaLocal(Poliza actualizada) {
+        Poliza guardada = polizaRepo.save(actualizada);
+        external.actualizarPolizaRemota(PolizaMapper.toDto(guardada));
+        return guardada;
+    }
 
-        // borra en remoto
+    // compatibilidad con código existente
+    public Poliza crearOActualizarPolizaLocal(Poliza p) {
+        return actualizarPolizaLocal(p);
+    }
+
+    // eliminar póliza local y en remoto
+    public void eliminarPolizaLocal(UUID clave) {
+        polizaRepo.deleteById(clave);
         external.eliminarPolizaRemota(clave);
     }
 
-    // hacer de crear/actualizar/eliminar cliente local y remoto
-    // también hacer de beneficiarios local y remoto
+    // ---- operaciones para clientes ----
+
+    public Cliente crearClienteLocal(Cliente nuevo) {
+        Cliente guardado = clienteRepo.save(nuevo);
+        external.crearClienteRemoto(ClienteMapper.toDto(guardado));
+        return guardado;
+    }
+
+    public Cliente actualizarClienteLocal(Cliente actualizado) {
+        Cliente guardado = clienteRepo.save(actualizado);
+        external.actualizarClienteRemoto(ClienteMapper.toDto(guardado));
+        return guardado;
+    }
+
+    public void eliminarClienteLocal(String curp) {
+        clienteRepo.deleteById(curp);
+        // si hubiera end-point para borrar en remoto se llamaría aquí
+    }
+
+    // ---- operaciones para beneficiarios ----
+
+    public BeneficiarioPoliza crearBeneficiarioLocal(BeneficiarioPoliza nuevo) {
+        BeneficiarioPoliza guardado = beneficiarioRepo.save(nuevo);
+        external.crearBeneficiarioRemoto(nuevo.getId().getClavePoliza(),
+                BeneficiarioMapper.toDto(guardado));
+        return guardado;
+    }
 
 }
