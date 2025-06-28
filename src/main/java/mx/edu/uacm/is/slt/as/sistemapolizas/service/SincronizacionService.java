@@ -55,7 +55,7 @@ public class SincronizacionService {
 
             // Beneficiarios: se reemplazan con los obtenidos del servicio remoto
             var beneficiariosRemotos = external.obtenerBeneficiariosPorPoliza(pDto.clave());
-            // elimina todos los beneficiarios locales existentes
+            // elimina todos los beneficiarios locales existentes y coloca los nuevos
             beneficiarioRepo.deleteAllByIdClavePoliza(pDto.clave());
 
             if (beneficiariosRemotos != null) {
