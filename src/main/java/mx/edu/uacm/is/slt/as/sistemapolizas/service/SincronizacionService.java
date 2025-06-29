@@ -12,6 +12,7 @@ import mx.edu.uacm.is.slt.as.sistemapolizas.mapper.PolizaMapper;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.Poliza;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.Cliente;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.BeneficiarioPoliza;
+import mx.edu.uacm.is.slt.as.sistemapolizas.model.BeneficiarioPolizaId;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.BeneficiarioPolizaRepository;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.ClienteRepository;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.PolizaRepository;
@@ -132,6 +133,17 @@ public class SincronizacionService {
         external.crearBeneficiarioRemoto(nuevo.getId().getClavePoliza(),
                 BeneficiarioMapper.toDto(guardado));
         return guardado;
+    }
+
+    public BeneficiarioPoliza actualizarBeneficiarioLocal(BeneficiarioPoliza actualizado) {
+        BeneficiarioPoliza guardado = beneficiarioRepo.save(actualizado);
+        // no existe endpoint para actualizar beneficiarios en el sistema remoto
+        return guardado;
+    }
+
+    public void eliminarBeneficiarioLocal(BeneficiarioPolizaId id) {
+        beneficiarioRepo.deleteById(id);
+        // no existe endpoint para borrar beneficiarios en el sistema remoto
     }
 
 }

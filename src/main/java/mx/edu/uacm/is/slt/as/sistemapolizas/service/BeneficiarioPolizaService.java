@@ -3,22 +3,19 @@ package mx.edu.uacm.is.slt.as.sistemapolizas.service;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.BeneficiarioPoliza;
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.BeneficiarioPolizaId;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.BeneficiarioPolizaRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class BeneficiarioPolizaService {
 
     private final BeneficiarioPolizaRepository repository;
-
-    @Autowired
-    public BeneficiarioPolizaService(BeneficiarioPolizaRepository repository) {
-        this.repository = repository;
-    }
+    private final SincronizacionService syncService;
 
     public List<BeneficiarioPoliza> buscarTodos() {
         return repository.findAll();
@@ -30,7 +27,7 @@ public class BeneficiarioPolizaService {
 
     @Transactional
     public BeneficiarioPoliza guardar(BeneficiarioPoliza nuevo) {
-        return repository.save(nuevo);
+        return syncService.crearBeneficiarioLocal(nuevo);
     }
 
     @Transactional
@@ -39,14 +36,14 @@ public class BeneficiarioPolizaService {
         return repository.findById(id)
                 .map(existing -> {
                     existing.setPorcentaje(actualizado.getPorcentaje());
-                    return repository.save(existing);
+                    return syncService.actualizarBeneficiarioLocal(existing);
                 });
     }
 
     @Transactional
     public boolean eliminarPorId(BeneficiarioPolizaId id) {
         if (repository.existsById(id)) {
-            repository.deleteById(id);
+            syncService.eliminarBeneficiarioLocal(id);
             return true;
         }
         return false;

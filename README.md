@@ -33,6 +33,10 @@ java -jar target/sistpolizas-0.0.1-SNAPSHOT.jar
 
 La aplicación queda disponible en `http://localhost:8080`.
 
+Al iniciar, el servicio ejecuta una sincronización automática con un sistema
+remoto configurado mediante la propiedad `remote.base-url` en
+`application.properties`.
+
 ## Uso básico del API
 
 Algunos ejemplos de los puntos de entrada REST:

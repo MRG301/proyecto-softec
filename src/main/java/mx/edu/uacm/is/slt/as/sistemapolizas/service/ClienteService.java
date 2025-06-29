@@ -2,21 +2,18 @@ package mx.edu.uacm.is.slt.as.sistemapolizas.service;
 
 import mx.edu.uacm.is.slt.as.sistemapolizas.model.Cliente;
 import mx.edu.uacm.is.slt.as.sistemapolizas.repository.ClienteRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ClienteService {
 
     private final ClienteRepository clienteRepository;
-
-    @Autowired
-    public ClienteService(ClienteRepository clienteRepository) {
-        this.clienteRepository = clienteRepository;
-    }
+    private final SincronizacionService syncService;
 
     // listar todos los clientes
     public List<Cliente> buscarTodos() {
@@ -30,7 +27,7 @@ public class ClienteService {
 
     // crear o guardar un cliente
     public Cliente guardar(Cliente nuevo) {
-        return clienteRepository.save(nuevo);
+        return syncService.crearClienteLocal(nuevo);
     }
 
     // actualizar un cliente existente
@@ -43,14 +40,14 @@ public class ClienteService {
                     existing.setDireccion(datosActualizados.getDireccion());
                     existing.setFechaNacimiento(datosActualizados.getFechaNacimiento());
 
-                    return clienteRepository.save(existing);
+                    return syncService.actualizarClienteLocal(existing);
                 });
     }
 
     // eliminar un cliente por CURP
     public boolean eliminarPorCurp(String curp) {
         if (clienteRepository.existsById(curp)) {
-            clienteRepository.deleteById(curp);
+            syncService.eliminarClienteLocal(curp);
             return true;
         }
         return false;
