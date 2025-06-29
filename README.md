@@ -36,6 +36,7 @@ La aplicación queda disponible en `http://localhost:8080`.
 Al iniciar, el servicio ejecuta una sincronización automática con un sistema
 remoto configurado mediante la propiedad `remote.base-url` en
 `application.properties`.
+Las operaciones de creación y actualización de datos se envían también al sistema remoto mediante el servicio de sincronización.
 
 ## Uso básico del API
 
